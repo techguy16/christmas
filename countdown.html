@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Christmas Countdown</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .countdown {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .time-unit {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 28px;
+            color: #ff4500;
+            border: 2px solid #ff4500;
+            border-radius: 5px;
+        }
+
+        .countdown-joke {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="countdown">
+        <h1>Christmas Countdown</h1>
+        <div id="countdown">
+            <span class="time-unit" id="days"></span>
+            <span class="time-unit" id="hours"></span>
+            <span class="time-unit" id="minutes"></span>
+            <span class="time-unit" id="seconds"></span>
+        </div>
+    </div>
+
+    <script>
+        const christmasDate = new Date('December 25, 2023 00:00:00').getTime();
+        const daysElement = document.getElementById('days');
+        const hoursElement = document.getElementById('hours');
+        const minutesElement = document.getElementById('minutes');
+        const secondsElement = document.getElementById('seconds');
+        const jokeSectionElement = document.getElementById('jokeSection');
+
+        const updateCountdown = () => {
+            const now = new Date().getTime();
+            const distance = christmasDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            daysElement.innerHTML = `<b>${days}</b><br>days`;
+            hoursElement.innerHTML = `<b>${hours}</b><br>hours`;
+            minutesElement.innerHTML = `<b>${minutes}</b><br>minutes`;
+            secondsElement.innerHTML = `<b>${seconds}</b><br>seconds`;
+
+            if (distance < 0) {
+                clearInterval(countdownTimer);
+                document.getElementById('countdown').innerHTML = '<span class="time-unit">Merry Christmas!</span>';
+            }
+        };
+
+        const fetchJoke = async () => {
+            try {
+                const response = await fetch('https://v2.jokeapi.dev/joke/Christmas?blacklistFlags=nsfw,religious,political,racist,sexist,explicit');
+                const data = await response.json();
+
+                if (data.error) {
+                    jokeSectionElement.innerHTML = 'No joke available at the moment. Merry Christmas!';
+                } else if (data.type === 'twopart') {
+                    jokeSectionElement.innerHTML = `
+            <div class="joke-setup">${data.setup}</div>
+            <div class="joke-button"><button onclick="showDelivery('${data.delivery}')">Tell Me!</button></div>
+            <p class="joke-delivery" id="deliveryText" style="display: none;"></p>
+          `;
+                } else {
+                    jokeSectionElement.innerHTML = `<p>${data.joke}</p>`;
+                }
+            } catch (error) {
+                jokeSectionElement.innerHTML = 'Failed to fetch a joke. Merry Christmas!';
+            }
+        };
+
+        const showDelivery = (delivery) => {
+            const deliveryTextElement = document.getElementById('deliveryText');
+            deliveryTextElement.innerText = delivery;
+            deliveryTextElement.style.display = 'block';
+            document.querySelector('.joke-button').style.display = 'none';
+        };
+
+        const countdownTimer = setInterval(updateCountdown, 1000);
+        fetchJoke();
+    </script>
+</body>
+
+</html>
